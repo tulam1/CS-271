@@ -1,7 +1,7 @@
 TITLE  Sorting & Counting Random Integers		(random.asm)
 
 ; Author: Tu Lam
-; Last Modified: 2/23/2020
+; Last Modified: 2/29/2020
 ; OSU Email Address: lamtu@oregonstate.edu
 ; Course Number/Section: CS 271 Section #400
 ; Project Number: Program #5		Due Date: 3/1/2020
@@ -9,6 +9,7 @@ TITLE  Sorting & Counting Random Integers		(random.asm)
 ;			   into an array. Then the number will be sorted and will display the median of
 ;			   the array and also the integers will be counted to display how many numbers there
 ;			   is in the whole array. [Ex: If there are 4 of the number 10, then display 4 has been counted.]
+;			   This assignment will be done in Register Indirect Address.
 
 INCLUDE Irvine32.inc
 
@@ -319,12 +320,15 @@ displayMedian PROC
 	mov		EBX, 2					;Move 2 into the EBX as a divisor
 	div		EBX						;Take 200 divide by 2 to get 100
 	dec		EAX						;Minus 1 to get 99
-	mov		EBX, EAX				;Move 99 into the EBX
+	mov		EBX, EAX				;Move 99 into the EBX to make a copy of the value
 	imul	EAX, 4					;Multiply 99 with 4 to get the index number in the array at that number
-	mov		EAX, [EDI + EAX]		;This to get the first median number
+	add		EDI, EAX				;Add the EAX to EDI to get to the index at 99
+	mov		EAX, [EDI]				;This to get the first median number
 	add		EBX, 1					;EBX 99 add 1 to make it 100
 	imul	EBX, 4					;Multiply 4 into EBX to get the second number index
-	mov		EBX, [EDI + EBX]		;Move that second number into the EBX
+	mov		EDI, [EBP + 12]			;Move the array to the first element again in the EDI
+	add		EDI, EBX				;Get to the index at 100 by adding the EBX to EDI
+	mov		EBX, [EDI]				;Move the second median number into the EBX
 	add		EAX, EBX				;Add the two numbers together
 	mov		EBX, 2					;Make EBX a divisor
 	div		EBX						;Take EAX divide by EBX to get average median
@@ -356,13 +360,15 @@ countList PROC
 	mov		EDX, 0					;Set EDX to 0
 
 	Loop_Count:
-		mov		EAX, [EDI + EDX]	;Move the element in the arr into EAX based on index of EDX
+		add		EDI, EDX			;Add the EDX which hold the index number into the sorted array
+		mov		EAX, [EDI]			;Move the element in the arr into EAX based on index of EDX
 		sub		EAX, [EBP + 16]		;Subtract the value of EAX using LO
 		mov		EBX, EAX			;Move the value after it subtract in EBX
 		imul	EBX, 4				;Multiply the EBX to get to the new array index
 		mov		EDI, [EBP + 8]		;Move the new array into EDI
 		mov		EAX, [EBP + 24]		;Move the arr_num which hold the value 1 into EAX
-		add		[EDI + EBX], EAX	;Add the value of the counter at that index
+		add		EDI, EBX			;Add the index number to the array
+		add		[EDI], EAX			;Add the value of the counter at that index
 		mov		EDI, [EBP + 12]		;Move the old array (sorted 200 nums) into EDI
 		add		EDX, 4				;Add 4 into the EDX
 		dec		ECX					;Decrement 1 in the ECX
